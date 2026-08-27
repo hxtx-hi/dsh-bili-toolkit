@@ -807,7 +807,7 @@ export function apply(ctx: any) {
           type: 'text',
           text: `推荐视频：\n`
             + items.slice(0, 10).map((v: any, i: number) =>
-              `${i + 1}. ${v.title} - ${v.author} (${v.play}播放)`
+              `${i + 1}. ${v.title} - ${v.author} (${v.play}播放) [${v.bvid}]`
             ).join('\n'),
         }];
       },
@@ -954,7 +954,7 @@ export function apply(ctx: any) {
           type: 'text',
           text: `历史记录（共${total}条，显示前${items.length}条）：\n`
             + items.map((h: any, i: number) =>
-              `${i + 1}. ${h.title || h.bvid}${h.tag_name ? ' [' + h.tag_name + ']' : ''}${h.author_name ? ' UP:' + h.author_name : ''}`
+              `${i + 1}. ${h.title || h.bvid} [${h.bvid}]${h.tag_name ? ' (' + h.tag_name + ')' : ''}${h.author_name ? ' UP:' + h.author_name : ''}`
             ).join('\n') || '无历史记录',
         }];
       },
