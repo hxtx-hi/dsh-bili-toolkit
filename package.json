@@ -1,0 +1,69 @@
+{
+  "name": "dsh-bilibili-search",
+  "description": "DSH插件：哔哩哔哩视频搜索、下载、用户习惯分析",
+  "version": "1.0.0",
+  "type": "module",
+  "packageManager": "pnpm@11.21.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [],
+      "platform": "web"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "watch": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
+    "prepare": "pnpm run build"
+  },
+  "license": "MIT",
+  "author": "DSH Community",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "cordis",
+    "plugin",
+    "bilibili",
+    "video",
+    "search",
+    "download"
+  ],
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@types/node": "^26.2.0",
+    "@types/react": "~18.3.1",
+    "lightningcss": "^1.32.0",
+    "tsdown": "0.22.14",
+    "typescript": "^5.6.0",
+    "zod": "^3.22.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "ffmpeg-static": "^5.0.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "qrcode-terminal": "^0.12.0",
+    "qrcode": "^1.5.3"
+  },
+  "files": [
+    "lib",
+    "src",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ]
+}

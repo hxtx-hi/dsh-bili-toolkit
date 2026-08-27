@@ -1,0 +1,4 @@
+# dsh-bilibili-search — profile patch layer
+- insert:
+    - id: dsh-bilibili-search
+      name: dsh-bilibili-search
