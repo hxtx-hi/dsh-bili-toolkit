@@ -260,7 +260,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_search',
-    description: '搜索哔哩哔哩视频，返回视频列表（标题、UP主、播放量等）',
+    description: '搜索哔哩哔哩视频，返回视频列表（标题、UP主、播放量等）。\n参数：keyword(必填)=搜索关键词字符串；page(选填)=页码，默认1；pageSize(选填)=每页数量，默认20',
     parameters: {
       type: 'object',
       properties: {
@@ -354,7 +354,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_search_user',
-    description: '搜索哔哩哔哩UP主/用户，返回用户列表（UID、昵称、粉丝数、签名等）。当需要找某个UP主时调用。',
+    description: '搜索哔哩哔哩UP主/用户，返回用户列表（UID、昵称、粉丝数、签名等）。\n参数：keyword(必填)=搜索关键词（UP主名或相关词）；page(选填)=页码，默认1',
     parameters: {
       type: 'object',
       properties: {
@@ -397,7 +397,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_resolve_url',
-    description: '解析B站短链接（b23.tv）或视频链接，提取BV号。当用户提供B站链接时调用此工具。',
+    description: '解析B站短链接（b23.tv）或视频链接，提取BV号。\n参数：url(必填)=B站视频链接（支持b23.tv短链、bilibili.com/video/BVxxx等格式）',
     parameters: {
       type: 'object',
       properties: {
@@ -453,7 +453,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_get_subtitles',
-    description: '获取B站视频的字幕内容。支持传入bvid或链接。字幕分为AI自动生成（lan字段以"ai-"开头）和UP主手打（lan字段不含"ai-"前缀）两种。AI字幕可能存在同音字/近似读音识别错误（如"僵尸"→"江西"），分析时需结合上下文推断；手打字幕则不存在此问题。',
+    description: '获取B站视频的字幕内容。\n参数：bvid(必填)=视频BV号或B站链接（支持完整URL和BV号）。\nAI字幕(lan以ai-开头)可能有同音字错误需结合上下文判断；手打字幕(lan不含ai-)识别准确。仅英文时说明视频有硬字幕，B站未生成中文AI字幕。',
     parameters: {
       type: 'object',
       properties: {
@@ -519,7 +519,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_video_detail',
-    description: '获取哔哩哔哩视频详情（标题、简介、三联数据等）',
+    description: '获取哔哩哔哩视频详情（标题、简介、播放/点赞/投币/收藏/弹幕/评论数据）。\n参数：bvid(必填)=视频BV号',
     parameters: {
       type: 'object',
       properties: {
@@ -567,7 +567,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_user_videos',
-    description: '列出UP主最近发布的视频。支持传入mid（用户UID）或用户名搜索。',
+    description: '列出UP主最近发布的视频。\n参数：mid(选填)=UP主UID；username(选填)=UP主用户名（用于搜索，如果传了mid则忽略）。两个参数至少传一个。\ncount(选填)=返回数量，默认10。合作视频会标注[合作视频]及关联UP主。',
     parameters: {
       type: 'object',
       properties: {
@@ -649,7 +649,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_comments',
-    description: '获取哔哩哔哩视频评论区内容。支持传入bvid或oid（视频aid），优先使用bvid自动查询aid。',
+    description: '获取哔哩哔哩视频评论区内容。\n参数：bvid(选填)=视频BV号（优先使用）；oid(选填)=视频AV号（aid），如果没有传bvid则使用此值。\nnext(选填)=翻页参数，默认0。至少传bvid或oid之一。',
     parameters: {
       type: 'object',
       properties: {
@@ -689,7 +689,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_user_info',
-    description: '获取哔哩哔哩UP主信息',
+    description: '获取哔哩哔哩UP主信息（昵称、头像、等级、粉丝数、关注数、签名、认证类型等）。\n参数：mid(必填)=用户UID。蓝V认证显示[蓝V]，黄V认证显示[黄V]。',
     parameters: {
       type: 'object',
       properties: {
@@ -726,7 +726,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_full_analysis',
-    description: '获取B站视频的字幕和封面图，分析视频内容',
+    description: '获取B站视频的字幕和封面图，用于分析视频内容。\n参数：bvid(必填)=视频BV号',
     parameters: {
       type: 'object',
       properties: {
@@ -789,7 +789,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_recommend',
-    description: '获取B站首页推荐视频列表。当用户说"推荐视频"、"有什么好看的"、"推荐一些视频"时调用此工具。',
+    description: '获取B站首页推荐视频列表。无需任何参数。蓝V/黄V认证作者会标注[蓝V]/[黄V]。',
     parameters: {
       type: 'object',
       properties: {},
@@ -836,7 +836,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_analyze_video',
-    description: '智能分析B站视频，支持输入URL或BV号，自动提取字幕和详情。当用户提供视频链接时调用。',
+    description: '智能分析B站视频，支持输入URL或BV号，自动提取字幕和详情。\n参数：input(必填)=视频URL或BV号',
     parameters: {
       type: 'object',
       properties: {
@@ -894,7 +894,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_user_favorites',
-    description: '获取用户收藏夹列表及每个收藏夹的视频内容（需要登录）。不传upMid默认获取当前登录用户的收藏夹。',
+    description: '获取用户收藏夹列表（需要登录）。\n参数：upMid(选填)=UP主UID，不传则默认获取当前登录用户的收藏夹。返回收藏夹名称和视频数量。',
     parameters: {
       type: 'object',
       properties: {
@@ -933,7 +933,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_user_history',
-    description: '获取用户观看历史记录（需要登录）。默认获取10条，传入count可指定数量（最大约200条，自动翻页）。',
+    description: '获取用户观看历史记录（需要登录）。\n参数：count(选填)=要获取的历史记录条数，默认10，最大约200。\ncount<=20直接获取；count>20自动翻页获取。显示标题、分类标签、UP主名。',
     parameters: {
       type: 'object',
       properties: {
@@ -977,7 +977,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_user_follows',
-    description: '获取用户关注的所有UP主列表（自动翻页，一次返回全部）。需要登录。如不传vmId则默认获取当前登录用户的关注列表。',
+    description: '获取用户关注的所有UP主列表（自动翻页，一次返回全部）。需要登录。\n参数：vmId(选填)=用户UID，不传则默认获取当前登录用户的关注列表。',
     parameters: {
       type: 'object',
       properties: {
@@ -1017,7 +1017,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_unread_count',
-    description: '获取B站未读消息数量（回复、@、点赞、系统通知等）。需要登录。',
+    description: '获取B站未读消息数量（回复、@、点赞、系统通知等）。需要登录。无需任何参数。',
     parameters: { type: 'object', properties: {} },
     output: {
       schema: {
@@ -1050,7 +1050,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_messages',
-    description: '获取B站消息列表（回复我的、@我的、收到的赞、系统通知）。需要登录。默认返回最近的消息。',
+    description: '获取B站消息列表。需要登录。\n参数：type(选填)=消息类型，默认返回最近消息。\ntype枚举值：reply=回复我的, at=@我的, like=收到的赞, system=系统通知。\npage(选填)=页码，默认1。',
     parameters: {
       type: 'object',
       properties: {
@@ -1120,7 +1120,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_like',
-    description: '给哔哩哔哩视频点赞（需要登录）',
+    description: '给哔哩哔哩视频点赞（需要登录）。\n参数：bvid(必填)=视频BV号',
     parameters: {
       type: 'object',
       properties: {
@@ -1141,7 +1141,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_unlike',
-    description: '取消哔哩哔哩视频点赞（需要登录）',
+    description: '取消哔哩哔哩视频点赞（需要登录）。\n参数：bvid(必填)=视频BV号',
     parameters: {
       type: 'object',
       properties: {
@@ -1162,7 +1162,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_coin',
-    description: '给哔哩哔哩视频投币（需要登录）',
+    description: '给哔哩哔哩视频投币（需要登录）。\n参数：bvid(必填)=视频BV号；multiply(选填)=投币数量（1或2），默认1',
     parameters: {
       type: 'object',
       properties: {
@@ -1184,7 +1184,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_favorite',
-    description: '收藏视频到指定收藏夹（需要登录）',
+    description: '收藏视频到指定收藏夹（需要登录）。\n参数：mediaId(必填)=收藏夹ID（可通过bilibili_user_favorites获取）；\nresources(必填)=资源标识，格式为 bvid:2（冒号后2表示收藏，1表示取消收藏）。',
     parameters: {
       type: 'object',
       properties: {
@@ -1206,7 +1206,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_follow',
-    description: '关注哔哩哔哩UP主（需要登录）',
+    description: '关注哔哩哔哩UP主（需要登录）。\n参数：mid(必填)=UP主UID',
     parameters: {
       type: 'object',
       properties: {
@@ -1227,7 +1227,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_unfollow',
-    description: '取消关注哔哩哔哩UP主（需要登录）',
+    description: '取消关注哔哩哔哩UP主（需要登录）。\n参数：mid(必填)=UP主UID',
     parameters: {
       type: 'object',
       properties: {
@@ -1250,7 +1250,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_get_video_streams',
-    description: '获取视频流地址（视频源+音频源）',
+    description: '获取视频流地址（视频源+音频源）。\n参数：bvid(必填)=视频BV号；cid(选填)=分P的CID，不传默认使用第一个分P。',
     parameters: {
       type: 'object',
       properties: {
@@ -1286,7 +1286,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_download_video',
-    description: '下载B站视频，自动合成音视频（需要ffmpeg，未安装会自动安装）。如用户未指定下载位置，默认下载到当前工作区目录。',
+    description: '下载B站视频，自动合成音视频（需要ffmpeg，未安装会自动安装）。\n参数：bvid(必填)=视频BV号；\nquality(选填)=画质ID：127=8K, 120=4K, 80=1080P, 64=720P；\noutputPath(选填)=输出目录，不传默认下载到当前工作区目录。',
     parameters: {
       type: 'object',
       properties: {
@@ -1326,7 +1326,7 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_analyze_habits',
-    description: '综合分析用户的B站观看画像：历史记录(150条+)、推荐页、收藏夹、稍后再看。需要登录。',
+    description: '综合分析用户的B站观看画像：历史记录(150条+)、推荐页(50条)、收藏夹、稍后再看。需要登录。无需任何参数。\n使用时间衰减权重分析兴趣偏好，收藏和稍后再看权重×1.5。',
     parameters: {
       type: 'object',
       properties: {},
@@ -1527,7 +1527,7 @@ export function apply(ctx: any) {
   // 设置Cookie
   ctx.tools.register({
     name: 'bilibili_set_cookie',
-    description: '直接使用Cookie字符串登录B站（不打开网页）。仅当用户明确说"使用cookie登录"或直接发送了Cookie字符串时调用。如果用户只是说"登录"，应该调用bilibili_login_qr打开登录网页。',
+    description: '直接使用Cookie字符串登录B站（不打开网页）。\n参数：cookie(必填)=B站Cookie字符串，格式如 SESSDATA=xxx; bili_jct=xxx; DedeUserID=xxx。\n仅当用户明确说使用cookie登录或直接发送了Cookie字符串时调用。',
     parameters: {
       type: 'object',
       properties: {
@@ -1549,7 +1549,7 @@ export function apply(ctx: any) {
   // 生成登录二维码（启动本地网页服务展示）
   ctx.tools.register({
     name: 'bilibili_login_qr',
-    description: '启动B站登录页面（localhost:8031）。当用户提到"登录"、"扫码"、"打开登录页面"时调用此工具。页面支持扫码登录和Cookie登录两种方式，登录成功后显示账号信息。页面持续5分钟后自动关闭。',
+    description: '启动B站扫码登录页面（localhost:8031）。无需任何参数。\n当用户提到登录、扫码、打开登录页面时调用。页面支持扫码和Cookie两种登录方式，登录成功后Cookie自动保存，页面5分钟后自动关闭。',
     parameters: { type: 'object', properties: {} },
     output: {
       schema: {
@@ -1589,7 +1589,7 @@ export function apply(ctx: any) {
   // 停止登录服务
   ctx.tools.register({
     name: 'bilibili_login_stop',
-    description: '停止B站登录页面服务（localhost:8031）。通常不需要手动调用，页面会5分钟自动关闭。',
+    description: '停止B站登录页面服务（localhost:8031）。无需任何参数。通常不需要手动调用，页面会5分钟自动关闭。',
     parameters: { type: 'object', properties: {} },
     output: {
       schema: { type: 'object', properties: { message: { type: 'string' } } },
@@ -1605,7 +1605,7 @@ export function apply(ctx: any) {
   // 导入Cookie字符串登录
   ctx.tools.register({
     name: 'bilibili_import_cookie',
-    description: '通过导入完整的Cookie字符串登录B站。适用于从浏览器开发者工具中复制的Cookie。',
+    description: '通过导入完整的Cookie字符串登录B站（不打开网页）。\n参数：cookie(必填)=从浏览器开发者工具中复制的完整Cookie字符串（包含SESSDATA、bili_jct、DedeUserID等）。',
     parameters: {
       type: 'object',
       properties: {
@@ -1651,7 +1651,7 @@ export function apply(ctx: any) {
   // 退出登录（清除Cookie）
   ctx.tools.register({
     name: 'bilibili_logout',
-    description: '退出B站登录，清除已保存的Cookie。当用户说"退出登录"、"注销"时调用。也可以通过登录网页上的"退出登录"按钮操作。',
+    description: '退出B站登录，清除已保存的Cookie。无需任何参数。用户说退出登录、注销时调用。',
     parameters: { type: 'object', properties: {} },
     output: {
       schema: { type: 'object', properties: { success: { type: 'boolean' }, message: { type: 'string' } } },
