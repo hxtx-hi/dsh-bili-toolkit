@@ -894,11 +894,11 @@ export function apply(ctx: any) {
 
   ctx.tools.register({
     name: 'bilibili_user_favorites',
-    description: '获取用户收藏夹列表（需要登录）',
+    description: '获取用户收藏夹列表及每个收藏夹的视频内容（需要登录）。不传upMid默认获取当前登录用户的收藏夹。',
     parameters: {
       type: 'object',
       properties: {
-        upMid: { type: 'number', description: 'UP主UID' },
+        upMid: { type: 'number', description: 'UP主UID，不传则默认获取当前登录用户' },
       },
     },
     output: {
@@ -908,26 +908,37 @@ export function apply(ctx: any) {
           list: { type: 'array', items: { type: 'object' } },
         },
       },
-      render: (_args: any, value: any) => [{
-        type: 'text',
-        text: `收藏夹列表：\n`
-          + (value.list || []).map((f: any) =>
-            `📁 ${f.title} (${f.media_count}个视频)`
-          ).join('\n') || '无收藏夹',
-      }],
+      render: (_args: any, value: any) => {
+        const folders = value.list || [];
+        return [{
+          type: 'text',
+          text: folders.length === 0 ? '无收藏夹'
+            : `收藏夹列表（共${folders.length}个）：\n`
+              + folders.map((f: any, i: number) =>
+                `${i + 1}. ${f.title} (${f.media_count || 0}个视频)`
+              ).join('\n'),
+        }];
+      },
     },
     async execute(args: { upMid?: number }) {
       const api = getAPI();
-      return { list: await api.getFavoriteFolders(args.upMid) };
+      try {
+        const list = await api.getFavoriteFolders(args.upMid);
+        return { list };
+      } catch (e: any) {
+        return { list: [], error: e.message };
+      }
     },
   });
 
   ctx.tools.register({
     name: 'bilibili_user_history',
-    description: '获取用户观看历史记录（需要登录）',
+    description: '获取用户观看历史记录（需要登录）。默认获取10条，传入count可指定数量（最大约200条，自动翻页）。',
     parameters: {
       type: 'object',
-      properties: {},
+      properties: {
+        count: { type: 'number', description: '要获取的历史记录条数，默认10，最大约200' },
+      },
     },
     output: {
       schema: {
@@ -936,17 +947,31 @@ export function apply(ctx: any) {
           list: { type: 'array', items: { type: 'object' } },
         },
       },
-      render: (_args: any, value: any) => [{
-        type: 'text',
-        text: `历史记录：\n`
-          + (value.list || []).slice(0, 10).map((h: any, i: number) =>
-            `${i + 1}. ${h.title || h.bvid}`
-          ).join('\n') || '无历史记录',
-      }],
+      render: (_args: any, value: any) => {
+        const total = (value.list || []).length;
+        const items = (value.list || []).slice(0, 20);
+        return [{
+          type: 'text',
+          text: `历史记录（共${total}条，显示前${items.length}条）：\n`
+            + items.map((h: any, i: number) =>
+              `${i + 1}. ${h.title || h.bvid}${h.tag_name ? ' [' + h.tag_name + ']' : ''}${h.author_name ? ' UP:' + h.author_name : ''}`
+            ).join('\n') || '无历史记录',
+        }];
+      },
     },
-    async execute() {
+    async execute(args: { count?: number }) {
       const api = getAPI();
-      return { list: await api.getHistory() };
+      const count = args.count || 10;
+      if (count <= 20) {
+        // 少量直接获取
+        const result = await api.request('https://api.bilibili.com/x/v2/history', {});
+        const list = (result.data || []).slice(0, count);
+        return { list };
+      } else {
+        // 大量使用cursor翻页
+        const list = await api.getHistoryMore(count);
+        return { list };
+      }
     },
   });
 

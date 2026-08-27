@@ -290,7 +290,17 @@ export class BilibiliAPI {
   async getFavoriteFolders(upMid?: number): Promise<FavoriteFolder[]> {
     const url = 'https://api.bilibili.com/x/v3/fav/folder/created/list-all';
     const params: Record<string, any> = {};
-    if (upMid) params.up_mid = upMid;
+    // 如果没有传upMid，从cookie中提取DedeUserID，或通过nav接口获取
+    if (upMid) {
+      params.up_mid = upMid;
+    } else {
+      // 从cookie中提取DedeUserID
+      const cookie = this.config.cookie || '';
+      const match = cookie.match(/DedeUserID=(\d+)/);
+      if (match) {
+        params.up_mid = match[1];
+      }
+    }
     const result = await this.request(url, params);
     if (result.code !== 0) throw new Error(result.message || '获取收藏夹列表失败');
     return result.data?.list || [];
@@ -597,7 +607,17 @@ export class BilibiliAPI {
     this.stopQrLoginServer();
     const TIMEOUT = 5 * 60 * 1000;
 
-    // 生成页面HTML（接受二维码参数）
+    // 生成页面HTML（横屏优化，无emoji）
+    const svgTV = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>';
+    const svgRefresh = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>';
+    const svgClose = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    const svgCheck = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    const svgKey = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#064e3b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>';
+    const svgPhone = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>';
+    const svgLogOut = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+    const svgCoin = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M8 10h8M8 14h8"/></svg>';
+    const svgPeople = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+    const svgHeart = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
     const buildPage = (qrDataUrl: string, qrKey: string) => `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -607,141 +627,127 @@ export class BilibiliAPI {
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",Helvetica,Arial,sans-serif;background:#f0fdf4;min-height:100vh;display:flex;align-items:center;justify-content:center;color:#064e3b}
-    .card{background:#fff;border:1px solid #d1fae5;border-radius:14px;padding:36px 32px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);text-align:center;max-width:420px;width:90%}
-    .logo{width:72px;height:72px;border-radius:50%;background:#f0fdf4;border:2px solid #d1fae5;display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:12px}
-    h1{font-size:20px;color:#064e3b;margin-bottom:4px;font-weight:600}
-    .sub{font-size:13px;color:#6b7280;margin-bottom:20px}
-    .qr-box{display:inline-block;padding:14px;border:1px solid #d1fae5;border-radius:14px;margin-bottom:16px;background:#f9fdfb;position:relative;transition:all .3s}
-    .qr-box img{display:block;border-radius:8px;transition:opacity .3s}
+    .card{background:#fff;border:1px solid #d1fae5;border-radius:14px;padding:28px 32px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);text-align:center;max-width:420px;width:95%}
+    .logo{width:56px;height:56px;border-radius:50%;background:#f0fdf4;border:2px solid #d1fae5;display:inline-flex;align-items:center;justify-content:center;margin-bottom:10px}
+    h1{font-size:18px;color:#064e3b;margin-bottom:2px;font-weight:600}
+    .sub{font-size:12px;color:#6b7280;margin-bottom:16px}
+    .qr-box{display:inline-block;padding:12px;border:1px solid #d1fae5;border-radius:12px;margin-bottom:12px;background:#f9fdfb;position:relative;transition:all .3s}
+    .qr-box img{display:block;border-radius:8px;transition:opacity .3s;width:160px;height:160px}
     .qr-box.loading img{opacity:.3}
-    .qr-box.loading::after{content:'';position:absolute;top:50%;left:50%;width:32px;height:32px;margin:-16px 0 0 -16px;border:3px solid #10b981;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite}
+    .qr-box.loading::after{content:'';position:absolute;top:50%;left:50%;width:28px;height:28px;margin:-14px 0 0 -14px;border:3px solid #10b981;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .fade-in{animation:fadeIn .3s ease}
     @keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-    #status{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;transition:all .3s}
+    #status{padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:8px;transition:all .3s}
     .st-waiting{background:#f0fdf4;color:#064e3b;border:1px solid #d1fae5}
     .st-scanned{background:#f0fdf4;color:#059669;border:1px solid #a7f3d0}
     .st-success{background:#f0fdf4;color:#065f46;border:1px solid #6ee7b7;font-weight:600}
     .st-expired{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
     .st-error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
-    .timer{font-size:11px;color:#9ca3af;margin-bottom:14px}
-    .btn-group{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
-    .btn{display:inline-block;padding:9px 20px;border:none;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;font-weight:500}
+    .timer{font-size:11px;color:#9ca3af;margin-bottom:10px}
+    .btn-group{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border:none;border-radius:8px;font-size:12px;cursor:pointer;transition:all .2s;font-weight:500}
     .btn-primary{background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff}
     .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
     .btn-primary:active{transform:translateY(0)}
     .btn-secondary{background:#f0fdf4;color:#064e3b;border:1px solid #d1fae5}
     .btn-secondary:hover{background:#dcfce7}
     .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
-    .steps{text-align:left;font-size:12px;color:#6b7280;margin-top:0;padding:14px;background:#f9fdfb;border:1px solid #d1fae5;border-radius:10px}
-    .steps li{margin-bottom:5px;list-style:none}
-    .steps li::before{content:'📱';margin-right:6px}
-    .divider{text-align:center;margin:18px 0;color:#d1fae5;font-size:12px;position:relative}
+    .steps{text-align:left;font-size:11px;color:#6b7280;padding:10px 12px;background:#f9fdfb;border:1px solid #d1fae5;border-radius:8px}
+    .steps li{margin-bottom:4px;list-style:none;display:flex;align-items:center;gap:6px}
+    .steps li svg{flex-shrink:0}
+    .divider{text-align:center;margin:14px 0;color:#d1fae5;font-size:11px;position:relative}
     .divider::before,.divider::after{content:'';position:absolute;top:50%;width:30%;height:1px;background:#d1fae5}
     .divider::before{left:0}.divider::after{right:0}
-    .cookie-section{text-align:left;margin-top:0;padding:14px;background:#f9fdfb;border:1px solid #d1fae5;border-radius:10px}
-    .cookie-section h3{font-size:14px;color:#064e3b;margin-bottom:6px;font-weight:600}
+    .cookie-section{text-align:left;padding:14px;background:#f9fdfb;border:1px solid #d1fae5;border-radius:10px}
+    .cookie-section h3{font-size:13px;color:#064e3b;margin-bottom:4px;font-weight:600;display:flex;align-items:center;gap:6px}
     .cookie-section p{font-size:11px;color:#6b7280;margin-bottom:8px}
-    .cookie-section textarea{width:100%;height:60px;border:1px solid #d1fae5;border-radius:8px;padding:8px;font-size:11px;font-family:monospace;resize:vertical;outline:none;transition:border-color .2s;background:#fff;color:#064e3b}
+    .cookie-section textarea{width:100%;height:52px;border:1px solid #d1fae5;border-radius:8px;padding:8px;font-size:11px;font-family:monospace;resize:none;outline:none;transition:border-color .2s;background:#fff;color:#064e3b}
     .cookie-section textarea:focus{border-color:#10b981}
     .cookie-section textarea::placeholder{color:#9ca3af}
-    .btn-cookie{display:block;width:100%;margin-top:8px;padding:9px;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+    .btn-cookie{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:8px;padding:8px;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s}
     .btn-cookie:hover{opacity:.9;transform:translateY(-1px)}
     .btn-cookie:active{transform:translateY(0)}
     .btn-cookie:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
-    .cookie-msg{margin-top:8px;font-size:12px;padding:6px 10px;border-radius:8px}
+    .cookie-msg{margin-top:6px;font-size:11px;padding:6px 10px;border-radius:6px}
     .cookie-msg.ok{background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0}
     .cookie-msg.err{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
-    /* 用户信息面板 */
     .user-panel{display:none;text-align:center}
     .user-panel.active{display:block}
-    .user-panel .avatar{width:80px;height:80px;border-radius:50%;border:3px solid #d1fae5;object-fit:cover;margin-bottom:10px}
-    .user-panel .uname{font-size:18px;font-weight:600;color:#064e3b;margin-bottom:2px}
-    .user-panel .level{display:inline-block;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;margin-bottom:8px}
-    .user-panel .sign{font-size:12px;color:#6b7280;margin-bottom:12px;font-style:italic}
-    .user-panel .stats{display:flex;justify-content:center;gap:20px;margin-bottom:16px}
-    .user-panel .stat-item{text-align:center}
-    .user-panel .stat-num{font-size:20px;font-weight:700;color:#10b981}
-    .user-panel .stat-label{font-size:11px;color:#9ca3af}
-    .user-panel .action-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-    .btn-logout{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;padding:9px 20px;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;font-weight:500}
+    .user-panel .avatar{width:64px;height:64px;border-radius:50%;border:3px solid #d1fae5;object-fit:cover;margin-bottom:8px}
+    .user-panel .uname{font-size:16px;font-weight:600;color:#064e3b;margin-bottom:2px}
+    .user-panel .level{display:inline-block;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;margin-bottom:6px}
+    .user-panel .sign{font-size:11px;color:#6b7280;margin-bottom:10px;font-style:italic}
+    .user-panel .stats{display:flex;justify-content:center;gap:24px;margin-bottom:14px}
+    .user-panel .stat-item{display:flex;flex-direction:column;align-items:center;gap:2px}
+    .user-panel .stat-icon{display:flex;align-items:center;justify-content:center}
+    .user-panel .stat-num{font-size:18px;font-weight:700;color:#10b981}
+    .user-panel .stat-label{font-size:10px;color:#9ca3af}
+    .user-panel .action-btns{display:flex;gap:8px;justify-content:center}
+    .btn-logout{display:inline-flex;align-items:center;gap:6px;background:#fef2f2;color:#991b1b;border:1px solid #fecaca;padding:8px 18px;border-radius:8px;font-size:12px;cursor:pointer;transition:all .2s;font-weight:500}
     .btn-logout:hover{background:#fee2e2}
-    .btn-close-server{background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;font-weight:500}
+    .btn-close-server{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:12px;cursor:pointer;transition:all .2s;font-weight:500}
     .btn-close-server:hover{opacity:.9}
-    /* 横屏分栏布局 */
     .login-columns{display:flex;flex-direction:column;gap:0}
-    .col-divider{margin:18px 0}
+    .col-divider{margin:14px 0}
     @media (orientation:landscape) and (min-width:700px){
-      .login-columns{flex-direction:row;gap:24px;align-items:flex-start}
+      .card{max-width:720px;padding:24px 36px}
+      .login-columns{flex-direction:row;gap:28px;align-items:stretch}
       .col-qr,.col-cookie{flex:1;min-width:0}
       .col-divider{display:none}
-      .card{max-width:700px;padding:28px 36px}
-      .cookie-section{margin-top:0}
+      .col-qr{display:flex;flex-direction:column;align-items:center}
+      .cookie-section{height:100%;display:flex;flex-direction:column}
+      .cookie-section textarea{flex:1;min-height:48px}
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="logo">📺</div>
+    <div class="logo">${svgTV}</div>
     <h1>B站扫码登录</h1>
     <p class="sub">请使用哔哩哔哩APP扫描下方二维码</p>
-    <!-- 横屏分栏容器 -->
     <div class="login-columns" id="loginColumns">
-      <!-- 左栏：扫码登录 -->
       <div class="col-qr">
         <div class="qr-box" id="qrBox"><img id="qr" src="${qrDataUrl}" alt="登录二维码"></div>
-        <div id="status" class="st-waiting">⏳ 等待扫码中...</div>
+        <div id="status" class="st-waiting">等待扫码中...</div>
         <div class="timer" id="timer">剩余时间：5:00</div>
         <div class="btn-group">
-          <button class="btn btn-primary" id="btnRefresh" onclick="doRefresh()">🔄 刷新二维码</button>
+          <button class="btn btn-primary" id="btnRefresh" onclick="doRefresh()">${svgRefresh} 刷新二维码</button>
         </div>
         <ul class="steps">
-          <li>打开哔哩哔哩APP</li>
-          <li>点击左上角扫一扫</li>
-          <li>扫描上方二维码</li>
-          <li>在手机上确认登录</li>
+          <li>${svgPhone} 打开哔哩哔哩APP</li>
+          <li>${svgPhone} 点击左上角扫一扫</li>
+          <li>${svgPhone} 扫描上方二维码</li>
+          <li>${svgPhone} 在手机上确认登录</li>
         </ul>
       </div>
-      <!-- 分割线（竖屏用） -->
       <div class="divider col-divider">或者</div>
-      <!-- 右栏：Cookie登录 -->
       <div class="col-cookie">
         <div class="cookie-section">
-          <h3>🍪 导入Cookie登录</h3>
+          <h3>${svgKey} 导入Cookie登录</h3>
           <p>粘贴B站Cookie字符串（包含SESSDATA、bili_jct等）</p>
           <textarea id="cookieInput" placeholder="SESSDATA=xxx; bili_jct=xxx; DedeUserID=xxx"></textarea>
-          <button class="btn-cookie" id="btnCookie" onclick="doSetCookie()">✅ 确认登录</button>
+          <button class="btn-cookie" id="btnCookie" onclick="doSetCookie()">${svgCheck} 确认登录</button>
           <div id="cookieMsg"></div>
         </div>
       </div>
     </div>
-    <!-- 关闭按钮 -->
-    <div class="btn-group" style="margin-top:14px">
-      <button class="btn btn-secondary" onclick="doClose()">❌ 关闭页面</button>
+    <div class="btn-group" style="margin-top:12px">
+      <button class="btn btn-secondary" onclick="doClose()">${svgClose} 关闭页面</button>
     </div>
-    <!-- 登录成功后的用户信息面板 -->
     <div class="user-panel" id="userPanel">
       <img class="avatar" id="userAvatar" src="" alt="头像">
       <div class="uname" id="userName"></div>
       <div class="level" id="userLevel"></div>
       <div class="sign" id="userSign"></div>
       <div class="stats">
-        <div class="stat-item">
-          <div class="stat-num" id="userCoin">0</div>
-          <div class="stat-label">硬币</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-num" id="userFollowing">0</div>
-          <div class="stat-label">关注</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-num" id="userFollower">0</div>
-          <div class="stat-label">粉丝</div>
-        </div>
+        <div class="stat-item"><div class="stat-icon">${svgCoin}</div><div class="stat-num" id="userCoin">0</div><div class="stat-label">硬币</div></div>
+        <div class="stat-item"><div class="stat-icon">${svgPeople}</div><div class="stat-num" id="userFollowing">0</div><div class="stat-label">关注</div></div>
+        <div class="stat-item"><div class="stat-icon">${svgHeart}</div><div class="stat-num" id="userFollower">0</div><div class="stat-label">粉丝</div></div>
       </div>
       <div class="action-btns">
-        <button class="btn-logout" onclick="doLogout()">🚪 退出登录</button>
-        <button class="btn-close-server" onclick="doClose()">❌ 关闭页面</button>
+        <button class="btn-logout" onclick="doLogout()">${svgLogOut} 退出登录</button>
+        <button class="btn-close-server" onclick="doClose()">${svgClose} 关闭页面</button>
       </div>
     </div>
   </div>
@@ -752,15 +758,12 @@ export class BilibiliAPI {
     let failCount = 0;
     const MAX_FAIL = 5;
 
-    // 页面加载后异步获取二维码（不阻塞页面渲染）
     window.addEventListener('DOMContentLoaded', async () => {
-      // 先检查是否已登录
       try {
         const loginRes = await fetch('/api/bilibili/current-user');
         const loginData = await loginRes.json();
         if (loginData.isLogin) { showUserPanel(); return; }
-      } catch (e) { /* 忽略 */ }
-      // 未登录则加载二维码
+      } catch (e) {}
       await loadQR();
     });
 
@@ -769,7 +772,7 @@ export class BilibiliAPI {
       const el = document.getElementById('status');
       const img = document.getElementById('qr');
       box.classList.add('loading');
-      el.className = 'st-waiting'; el.textContent = '⏳ 正在加载二维码...';
+      el.className = 'st-waiting'; el.textContent = '正在加载二维码...';
       try {
         const res = await fetch('/api/bilibili/qr-generate');
         const data = await res.json();
@@ -777,7 +780,7 @@ export class BilibiliAPI {
           qrKey = data.qrcodeKey; failCount = 0;
           img.src = data.qrDataUrl;
           img.classList.add('fade-in');
-          el.className = 'st-waiting'; el.textContent = '⏳ 等待扫码中...';
+          el.className = 'st-waiting'; el.textContent = '等待扫码中...';
           box.classList.remove('loading');
           remaining = ${TIMEOUT / 1000};
           clearInterval(countDown);
@@ -785,11 +788,11 @@ export class BilibiliAPI {
           clearInterval(pollTimer);
           pollTimer = setInterval(poll, 1000);
         } else {
-          el.className = 'st-error'; el.textContent = '❌ 加载失败：' + (data.message || '未知');
+          el.className = 'st-error'; el.textContent = '加载失败：' + (data.message || '未知');
           box.classList.remove('loading');
         }
       } catch(e) {
-        el.className = 'st-error'; el.textContent = '❌ 网络错误';
+        el.className = 'st-error'; el.textContent = '网络错误';
         box.classList.remove('loading');
       }
     }
@@ -814,31 +817,29 @@ export class BilibiliAPI {
         const el = document.getElementById('status');
         if (data.code === 0) {
           el.className = 'st-success fade-in';
-          el.textContent = '✅ 登录成功！账号已保存，正在跳转...';
+          el.textContent = '登录成功！账号已保存，正在跳转...';
           clearInterval(pollTimer); clearInterval(countDown);
-          // 延迟1秒跳转到用户面板
           setTimeout(() => showUserPanel(), 1000);
           return;
         } else if (data.code === 1 || data.code === 86101) {
-          // 1=已扫码等待确认, 86101=未扫码等待中
           if (data.code === 1) {
             el.className = 'st-scanned fade-in';
-            el.textContent = '📲 已扫码，请在手机上确认登录...';
+            el.textContent = '已扫码，请在手机上确认登录...';
           } else {
             el.className = 'st-waiting';
-            el.textContent = '⏳ 等待扫码中...';
+            el.textContent = '等待扫码中...';
           }
           failCount = 0;
         } else if (data.code === 86038) {
           el.className = 'st-expired fade-in';
-          el.textContent = '❌ 二维码已过期，请点击刷新获取新二维码';
+          el.textContent = '二维码已过期，请点击刷新获取新二维码';
           clearInterval(pollTimer);
           return;
         } else {
           failCount++;
           if (failCount >= MAX_FAIL) {
             el.className = 'st-expired fade-in';
-            el.textContent = '❌ 连接异常，请点击刷新获取新二维码';
+            el.textContent = '连接异常，请点击刷新获取新二维码';
             clearInterval(pollTimer);
           }
         }
@@ -847,7 +848,7 @@ export class BilibiliAPI {
         if (failCount >= MAX_FAIL) {
           clearInterval(pollTimer);
           document.getElementById('status').className = 'st-error fade-in';
-          document.getElementById('status').textContent = '❌ 网络异常，请点击刷新';
+          document.getElementById('status').textContent = '网络异常，请点击刷新';
         }
       }
     }
@@ -857,9 +858,9 @@ export class BilibiliAPI {
       const box = document.getElementById('qrBox');
       const btn = document.getElementById('btnRefresh');
       const el = document.getElementById('status');
-      btn.disabled = true; btn.textContent = '⏳ 刷新中...';
+      btn.disabled = true; btn.textContent = '刷新中...';
       box.classList.add('loading');
-      el.className = 'st-waiting'; el.textContent = '⏳ 正在获取新二维码...';
+      el.className = 'st-waiting'; el.textContent = '正在获取新二维码...';
       try {
         const res = await fetch('/api/bilibili/qr-generate');
         const data = await res.json();
@@ -868,21 +869,21 @@ export class BilibiliAPI {
           const img = document.getElementById('qr');
           img.src = data.qrDataUrl;
           remaining = ${TIMEOUT / 1000};
-          el.className = 'st-waiting fade-in'; el.textContent = '⏳ 等待扫码中...';
+          el.className = 'st-waiting fade-in'; el.textContent = '等待扫码中...';
           box.classList.remove('loading');
           clearInterval(countDown);
           countDown = setInterval(updateTimer, 1000);
           clearInterval(pollTimer);
           pollTimer = setInterval(poll, 1000);
         } else {
-          el.className = 'st-error'; el.textContent = '❌ 刷新失败：' + (data.message || '未知错误');
+          el.className = 'st-error'; el.textContent = '刷新失败：' + (data.message || '未知错误');
           box.classList.remove('loading');
         }
       } catch(e) {
-        el.className = 'st-error'; el.textContent = '❌ 刷新失败：网络错误';
+        el.className = 'st-error'; el.textContent = '刷新失败：网络错误';
         box.classList.remove('loading');
       }
-      btn.disabled = false; btn.textContent = '🔄 刷新二维码';
+      btn.disabled = false; btn.innerHTML = '${svgRefresh} 刷新二维码';
     }
 
     function doClose() {
@@ -895,12 +896,10 @@ export class BilibiliAPI {
         const res = await fetch('/api/bilibili/current-user');
         const data = await res.json();
         if (data.isLogin) {
-          // 隐藏整个登录区域和关闭按钮
           document.getElementById('loginColumns').style.display = 'none';
           document.querySelectorAll('.card > .btn-group').forEach(el => el.style.display = 'none');
           document.querySelector('.card > h1').style.display = 'none';
           document.querySelector('.card > .sub').style.display = 'none';
-          // 显示用户面板
           const panel = document.getElementById('userPanel');
           panel.classList.add('active');
           document.getElementById('userAvatar').src = data.face ? '/api/bilibili/avatar-proxy?url=' + encodeURIComponent(data.face) : '';
@@ -912,16 +911,13 @@ export class BilibiliAPI {
           document.getElementById('userFollower').textContent = data.follower || 0;
           document.title = data.uname + ' - 已登录';
         }
-      } catch (e) {
-        // 忽略
-      }
+      } catch (e) {}
     }
 
     async function doLogout() {
       if (!confirm('确定要退出登录吗？')) return;
       try {
         await fetch('/api/bilibili/logout', { method: 'POST' });
-        // 恢复登录面板
         document.getElementById('userPanel').classList.remove('active');
         document.getElementById('loginColumns').style.display = '';
         document.querySelectorAll('.card > .btn-group').forEach(el => el.style.display = '');
@@ -941,8 +937,8 @@ export class BilibiliAPI {
       const btn = document.getElementById('btnCookie');
       const msg = document.getElementById('cookieMsg');
       const cookie = input.value.trim();
-      if (!cookie) { msg.className = 'cookie-msg err'; msg.textContent = '❌ 请输入Cookie'; return; }
-      btn.disabled = true; btn.textContent = '⏳ 验证中...';
+      if (!cookie) { msg.className = 'cookie-msg err'; msg.textContent = '请输入Cookie'; return; }
+      btn.disabled = true; btn.textContent = '验证中...';
       try {
         const res = await fetch('/api/bilibili/cookie-set', {
           method: 'POST',
@@ -951,16 +947,16 @@ export class BilibiliAPI {
         });
         const data = await res.json();
         if (data.success) {
-          msg.className = 'cookie-msg ok'; msg.textContent = '✅ ' + data.message;
-          btn.textContent = '✅ 登录成功！';
+          msg.className = 'cookie-msg ok'; msg.textContent = data.message;
+          btn.textContent = '登录成功！';
           showUserPanel();
         } else {
-          msg.className = 'cookie-msg err'; msg.textContent = '❌ ' + data.message;
-          btn.disabled = false; btn.textContent = '✅ 确认登录';
+          msg.className = 'cookie-msg err'; msg.textContent = data.message;
+          btn.disabled = false; btn.innerHTML = '${svgCheck} 确认登录';
         }
       } catch(e) {
-        msg.className = 'cookie-msg err'; msg.textContent = '❌ 网络错误';
-        btn.disabled = false; btn.textContent = '✅ 确认登录';
+        msg.className = 'cookie-msg err'; msg.textContent = '网络错误';
+        btn.disabled = false; btn.innerHTML = '${svgCheck} 确认登录';
       }
     }
   </script>
