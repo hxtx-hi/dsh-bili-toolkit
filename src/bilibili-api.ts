@@ -2,6 +2,10 @@
  * B站API封装
  */
 
+// ESM垫片：允许第三方CommonJS库使用require()
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
 import axios, { AxiosInstance } from 'axios';
 import { getWbiKeys, generateWbiSignature } from './wbi-sign.js';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';

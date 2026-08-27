@@ -1,3 +1,7 @@
+// ESM垫片：允许第三方CommonJS库使用require()（如combined-stream、form-data等）
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
 /**
  * dsh-bilibili-search 插件主入口
  *

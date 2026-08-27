@@ -3,6 +3,10 @@
  * 支持DASH格式音视频分离下载 + ffmpeg合成
  */
 
+// ESM垫片：允许第三方CommonJS库使用require()
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs/promises';
