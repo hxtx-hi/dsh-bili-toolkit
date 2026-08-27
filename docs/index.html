@@ -174,9 +174,18 @@
     font-size:.85rem;color:var(--text);
     overflow-x:auto;position:relative;
     transition:background .3s,border-color .3s;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
   }
-  .code-block code{color:var(--accent2);font-weight:500}
-  .code-block .prompt{color:var(--text3);margin-right:8px;user-select:none}
+  .code-block code{color:var(--accent2);font-weight:500;flex:1;min-width:0;overflow-x:auto;white-space:nowrap}
+  .code-block .prompt{color:var(--text3);margin-right:8px;user-select:none;flex-shrink:0}
+  .copy-btn{
+    flex-shrink:0;width:32px;height:32px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+    cursor:pointer;transition:all .2s;color:var(--text2);
+  }
+  .copy-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .copy-btn.copied{background:#22c55e;color:#fff;border-color:#22c55e}
 
   .priority-badge{
     display:inline-flex;align-items:center;gap:4px;
@@ -338,12 +347,15 @@
       <div class="install-card">
         <div class="install-card-inner">
           <div class="install-card-header">
-            <div class="icon gitee">🔗</div>
+            <div class="icon gitee"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
             <div class="text">Gitee（推荐）</div>
             <span class="priority-badge">⭐ 优先</span>
           </div>
           <div class="code-block">
             <span class="prompt">$</span><code>dsh --profile web plugin add https://gitee.com/hxtx-hi/dsh-bili-toolkit.git</code>
+            <button class="copy-btn" onclick="copyCommand(this)" data-cmd="dsh --profile web plugin add https://gitee.com/hxtx-hi/dsh-bili-toolkit.git" title="复制命令">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -352,11 +364,14 @@
       <div class="install-card">
         <div class="install-card-inner">
           <div class="install-card-header">
-            <div class="icon github">🐱</div>
+            <div class="icon github"><svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></div>
             <div class="text">GitHub</div>
           </div>
           <div class="code-block">
             <span class="prompt">$</span><code>dsh --profile web plugin add https://github.com/hxtx-hi/dsh-bili-toolkit.git</code>
+            <button class="copy-btn" onclick="copyCommand(this)" data-cmd="dsh --profile web plugin add https://github.com/hxtx-hi/dsh-bili-toolkit.git" title="复制命令">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -474,27 +489,27 @@
     <h2 class="section-title">特色功能</h2>
     <div class="highlights-grid">
       <div class="highlight-item">
-        <span class="highlight-icon">🔵</span>
+        <span class="highlight-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg></span>
         <div class="highlight-text">蓝V/黄V认证标签</div>
       </div>
       <div class="highlight-item">
-        <span class="highlight-icon">🤝</span>
+        <span class="highlight-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
         <div class="highlight-text">合作视频标记</div>
       </div>
       <div class="highlight-item">
-        <span class="highlight-icon">🎙️</span>
+        <span class="highlight-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>
         <div class="highlight-text">字幕类型识别</div>
       </div>
       <div class="highlight-item">
-        <span class="highlight-icon">📉</span>
+        <span class="highlight-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
         <div class="highlight-text">时间衰减分析</div>
       </div>
       <div class="highlight-item">
-        <span class="highlight-icon">📄</span>
+        <span class="highlight-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
         <div class="highlight-text">自动翻页</div>
       </div>
       <div class="highlight-item">
-        <span class="highlight-icon">🔧</span>
+        <span class="highlight-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
         <div class="highlight-text">ffmpeg自动安装</div>
       </div>
     </div>
@@ -542,6 +557,43 @@ function toggleTheme(){
     document.getElementById('themeKnob').innerHTML=saved==='light'?sunSVG:moonSVG;
   }
 })();
+
+// 复制命令函数
+function copyCommand(btn){
+  var cmd=btn.getAttribute('data-cmd');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(cmd).then(function(){
+      showCopied(btn);
+    }).catch(function(){
+      fallbackCopy(cmd,btn);
+    });
+  }else{
+    fallbackCopy(cmd,btn);
+  }
+}
+
+function fallbackCopy(text,btn){
+  var ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.position='fixed';
+  ta.style.left='-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try{
+    document.execCommand('copy');
+    showCopied(btn);
+  }catch(e){}
+  document.body.removeChild(ta);
+}
+
+function showCopied(btn){
+  btn.classList.add('copied');
+  btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  setTimeout(function(){
+    btn.classList.remove('copied');
+    btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  },2000);
+}
 </script>
 
 </body>
